@@ -12,6 +12,7 @@ library(r4ss)
 #set the project directory as the main directory
 dir <-getwd()
 
+#dir <- "C:/Users/desiree.tommasi/Documents/CAFA/Synthesis/MSEscenarios/Github/MSEscenarios"
 #read in the recruitment and ssb estimated from the DynaMICE. Note this is the ensemble mean
 #across all nine DynaMICE ensemble members when forced by the historical reanalysis (RA),
 #by each each ESM and averaged across the three ESMs.
@@ -56,7 +57,7 @@ srplot <- ggplot(plotdat) +
   labs(title = "Stock Recruitment Curve Fit to DynaMICE", y = "Recruits (log)", x = "SSB")+
   theme(axis.title = element_text(size = rel(1.25)),axis.text = element_text(size = rel(1.25)),
         strip.text = element_text(size = rel(1.25)),
-        legend.text = element_text(size=rel(1.20)), legend.title = element_text(size=rel(1.25)),
+        legend.text = element_text(size=rel(1.1)), legend.title = element_text(size=rel(1.1)),
         legend.position = "inside",legend.position.inside = c(0.75,0.25))
 
 
@@ -72,18 +73,44 @@ devsmry <-frdevs %>% filter(scen=="R_climate") %>% group_by(yr) %>% summarise(
   recdev95= quantile(value, probs = 0.95)
 )
 
+#add a factor for plotting
+devsmry$Type="Future Climate"
+
+#load the recruitment deviations from the No-climate run
+#generated with code "Synthesis_scenarios_runs_MICERec.R"
+ncrdevs <- read.table(paste0(dir,"/dat/rdev_No_climate.csv"))
+
+#calculate the median and quantiles across the 100 iterations, 
+#Note all scenarios have the same recruitment deviations, just pick one
+ncdevsmry <-ncrdevs %>% group_by(Year) %>% summarise(
+  mrecdev = median(Rdev),
+  recdev5 = quantile(Rdev, probs= 0.05),
+  recdev95= quantile(Rdev, probs = 0.95)
+)
+
+names(ncdevsmry)[1]="yr"
+ncdevsmry$Type="Base OM"
+
+#combine the two rdevs matrices
+Rdmat<-rbind(devsmry,ncdevsmry)
+
 #load historical OM deviations
 hrdevs <- read.csv(paste0(dir,"/dat/HistOMRecdevs.csv"))
-rdplot=ggplot(devsmry, aes(x=yr, y=mrecdev)) + 
-  geom_ribbon(aes(x=yr, ymin=recdev5, ymax=recdev95),alpha=0.3)+
-  geom_line(linewidth=1,color="black")+xlab("")+ylab("Recruitment Deviations")+
-  theme_bw()+xlim(1994,2068)+labs(title = "OM Recruitment Deviations")+
+hrdevs$Type="Historical"
+rdplot=ggplot(Rdmat, aes(x=yr, y=mrecdev, color=Type, fill=Type)) + 
   geom_line(data=hrdevs, aes(x=Yr,y=dev),linewidth=1,color="black")+
+  geom_ribbon(aes(x=yr, ymin=recdev5, ymax=recdev95),alpha=0.3)+
+  geom_line(linewidth=1)+xlab("")+ylab("Recruitment Deviations")+
+  theme_bw()+xlim(1994,2068)+labs(title = "OM Recruitment Deviations")+
   theme(axis.title = element_text(size = rel(1.25)),axis.text = element_text(size = rel(1.25)),
         axis.text.x = element_text(angle = 90), strip.text = element_text(size = rel(1.25)),
-        legend.text = element_text(size=rel(1.20)), legend.title = element_text(size=rel(1.25)))
+        legend.text = element_text(size=rel(1.1)), legend.title = element_text(size=rel(1.1)),
+        legend.position = "inside",legend.position.inside = c(0.55,0.11))+
+  scale_fill_manual(name = "",values = c("Base OM"="cyan3","Future Climate"="brown2"))+
+  scale_color_manual(values = c("Base OM"="cyan3","Future Climate"="brown2"))+
+  guides(color = "none")
 
 #-------------------------------Figure 4--------------------------------------------------
 library(gridExtra)
 combo.rec <- grid.arrange(arrangeGrob(srplot,rdplot,ncol=2))
-ggsave("Rplot_combo.png",plot = combo.rec, width = 8, height = 4)
+ggsave("Rplot_combo_v2.png",plot = combo.rec, width = 9, height = 5.5)

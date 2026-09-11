@@ -22,6 +22,7 @@ wpath <- getwd()
 
 #read weight at age output from IBM - it will take a little bit, it's a large file
 wgtsnna=read.csv(paste0(wpath,"/dat/ibmwgtsmat.csv"))
+wgtsnna=read.csv("C:/Users/desiree.tommasi/Documents/CAFA/Synthesis/MSEscenarios/IBMout/ibmwgtsmat.csv")
 
 wts.plot<-ggplot(wgtsnna %>% filter(year %in% c(1991:2020, 2071:2100)),aes(x = as.factor(age), y = wgtmd, color=Period)) +
   geom_boxplot(outliers=FALSE)+
@@ -79,9 +80,9 @@ wgtsnna$length<-((wgtsnna$wgtmd/1000)/(7.5242e-6))^(1/3.2332)
 # Define von Bertalanffy growth function - SS style
 
 # Parameters from Stock Synthesis base OM of Wildermuth et al. 2024
-L_at_Amin <- 13.1626 
-L_inf <- 25.1617
-K <- 0.274765     
+L_at_Amin <- 13.17435 
+L_inf <- 25.1530
+K <- 0.273110     
 age0 <- 0.5 
 
 # Generate ages
