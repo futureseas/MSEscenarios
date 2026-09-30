@@ -114,3 +114,4 @@ rdplot=ggplot(Rdmat, aes(x=yr, y=mrecdev, color=Type, fill=Type)) +
 library(gridExtra)
 combo.rec <- grid.arrange(arrangeGrob(srplot,rdplot,ncol=2))
 ggsave("Rplot_combo_v2.png",plot = combo.rec, width = 9, height = 5.5)
+
